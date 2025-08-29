@@ -2,11 +2,14 @@ const https = require("https");
 const fs = require("fs");
 const express = require("express");
 const socketIo = require("socket.io");
-const path = require("path");
+const cors = require('cors')
 
 const app = express();
 
+app.use(cors())
 app.use(express.static(__dirname + '/public'));
+app.use(express.json());
+
 
 const key = fs.readFileSync("./certs/cert.key");
 const cert = fs.readFileSync("./certs/cert.crt");
