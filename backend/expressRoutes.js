@@ -1,7 +1,7 @@
 const { app } = require('./server');
 const jwt = require("jsonwebtoken");
 
-const linkSecret = "adasd##fase$asf5563GDS5%"
+const linkSecret = "adasd##fase$asf5563GDS5%";
 
 
 app.get('/user-link',(req,res) => {

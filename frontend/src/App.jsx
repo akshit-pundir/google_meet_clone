@@ -2,7 +2,7 @@ import React from 'react'
 import socketConnection from './utilities/socketConnection.js';
 import { Route, Routes } from 'react-router-dom';
 
-import MainVideoPage from './videoComponents/mainVideoPage.jsx';
+import MainVideoPage from './videoComponents/MainVideoPage.jsx';
 
 const Home = () => <h1>Hello Home</h1>
 

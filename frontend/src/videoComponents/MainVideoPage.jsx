@@ -1,7 +1,9 @@
 import React from 'react'
 import axios from 'axios'
 import { useSearchParams } from 'react-router-dom'
-
+import ChatWindow from './ChatWindow';
+import CallInfo from './CallInfo';
+import './videoComp.css';
 
 
 const MainVideoPage = () => {
@@ -31,11 +33,22 @@ const MainVideoPage = () => {
 
  
   return (
-    <div>
-        <h1>{apptInfo.professionalsFullName} at {apptInfo.apptDate}</h1>
+      <div className='main-video-page'>
 
-    </div>
+          <div className='video-chat-wrapper'>
+
+              <video id='large-feed' autoPlay playsInline ></video>  
+              <video id='own-feed' autoPlay playsInline ></video>  
+
+              {apptInfo.professionalsFullName ? <CallInfo apptInfo={apptInfo}/> : <>User</> }  
+
+              <ChatWindow/>
+          </div>
+
+
+          
+      </div>
   )
 }
 
-export default MainVideoPage
+export default MainVideoPage;
