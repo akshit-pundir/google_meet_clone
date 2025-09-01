@@ -1,15 +1,55 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import axios from 'axios'
 import { useSearchParams } from 'react-router-dom'
 import ChatWindow from './ChatWindow';
 import CallInfo from './CallInfo';
 import './videoComp.css';
+import ActionButtons from './ActionButton';
+import { useDispatch } from 'react-redux';
+import addStream from '../redux-elements/actions/addStream';
+import createPeerConnection from '../utilities/createPeerConnection';
+import socket from '../utilities/socketConnection';
+import updateCallStatus from '../redux-elements/actions/updateCallStatus';
+
 
 
 const MainVideoPage = () => {
 
+  const dispatch = useDispatch();
   const [searchParams,setSearchParams] = useSearchParams();
   const [apptInfo,setApptInfo] = React.useState({})
+
+  const smallFeedEl = useRef(null);
+  const largeFeedEl = useRef(null);
+
+
+  React.useEffect(()=>{
+
+    const fetchMedia = async()=>{
+        
+        const constraints = {
+              video:true,
+              audio:false
+        }
+
+        try{
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            dispatch(updateCallStatus('haveMedia',true))
+            
+            dispatch(addStream('localStream',stream));
+            const { peerConnection ,remoteStream } =  await createPeerConnection();
+
+            dispatch(addStream( 'remote1', remoteStream, peerConnection ))
+
+        }catch(err){
+            console.log(err.message);
+        }
+
+    }
+
+    fetchMedia();
+
+  },[])
 
 
 
@@ -37,14 +77,15 @@ const MainVideoPage = () => {
 
           <div className='video-chat-wrapper'>
 
-              <video id='large-feed' autoPlay playsInline ></video>  
-              <video id='own-feed' autoPlay playsInline ></video>  
+              <video id='large-feed' ref={largeFeedEl}  autoPlay playsInline ></video>  
+              <video id='own-feed' ref={smallFeedEl}  autoPlay playsInline ></video>  
 
               {apptInfo.professionalsFullName ? <CallInfo apptInfo={apptInfo}/> : <>User</> }  
 
               <ChatWindow/>
           </div>
 
+            <ActionButtons/>
 
           
       </div>
