@@ -85,7 +85,7 @@ const MainVideoPage = () => {
               <ChatWindow/>
           </div>
 
-            <ActionButtons/>
+            <ActionButtons smallFeedlEl={smallFeedEl}/>
 
           
       </div>
