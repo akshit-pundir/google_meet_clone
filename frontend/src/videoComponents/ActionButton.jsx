@@ -7,7 +7,7 @@ import AudioButton from './audioButton/AudioButton';
 
 
 
-const ActionButtons = ({openCloseChat,smallFeedlEl})=>{
+const ActionButtons = ({openCloseChat,smallFeedEl})=>{
 
     const callStatus = useSelector(state => state.callStatus);
     // const callStatus = useSelector(state=>state.callStatus);
@@ -47,8 +47,8 @@ const ActionButtons = ({openCloseChat,smallFeedlEl})=>{
         <div id="menu-buttons" ref={menuButtons} className="row">
             {/* <i className="fa fa-microphone" style="font-size:48px;color:red"></i> */}
             <div className="left col-2">
-                    <AudioButton/>
-                    <VideoButton smallFeedlEl={smallFeedlEl}/>
+                    <AudioButton smallFeedEl={smallFeedEl}/>
+                    <VideoButton smallFeedEl={smallFeedEl}/>
             </div>
 
             <div className="col-8 text-center">

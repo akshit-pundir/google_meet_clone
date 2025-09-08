@@ -1,7 +1,7 @@
 import React from 'react'
 import updateCallStatus from '../../redux-elements/actions/updateCallStatus';
 
-const StartLocalStream = (streams,dispatch) => {
+const StartAudioStream = (streams) => {
 
     const localStream = streams.localStream;
 
@@ -10,14 +10,14 @@ const StartLocalStream = (streams,dispatch) => {
         if(s != "localStream"){
           const currentStream = streams[s];
           
-          localStream.stream.getVideoTracks().forEach( trk => {
+          localStream.stream.getAudioTracks().forEach( trk => {
 
                 currentStream.peerConnection.addTrack(trk,streams.localStream.stream);
               });
-          dispatch(updateCallStatus('video','enabled'))    
-      }  
+        }  
+            
     }
   
 }
 
-export default StartLocalStream;
+export default StartAudioStream;

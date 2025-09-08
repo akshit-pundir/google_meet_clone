@@ -4,36 +4,23 @@ import StartLocalStream from './StartLocalStream.js';
 import updateCallStatus from '../../redux-elements/actions/updateCallStatus.js';
 import getDevices from '../../utilities/getDevices.js';
 import addStream from '../../redux-elements/actions/addStream.js';
+import ActionButtonCaret from '../ActionButtonCaret.jsx';
 
-const VideoButton = ( { smallFeedlEl } ) => {
+const VideoButton = ( { smallFeedEl } ) => {
 
     const callStatus = useSelector(state => state.callStatus);
     const streams = useSelector(state => state.streams);  
     const [ pendingUpdate, setPendingUpdate ] = React.useState(false);
     const [ caretOpen ,setCaretOpen ] = React.useState(false);
-    const [videoDeviceList ,setVideoDeviceList] = React.useState([]);
+    const [ videoDeviceList ,setVideoDeviceList ] = React.useState([]);
     const dispatch = useDispatch();
-
-    const Dropdown = () => {
-        return(
-            <div className='caret-dropdown' style={{top:"-25px" }}>
-                <select defaultValue={callStatus.deviceId} onChange={changeVideoDevice}> 
-                        { videoDeviceList?.map( ( vd ) =>  <option key={vd.deviceId} value={vd.deviceId}> { vd.label } </option> )  }
-                </select>
-
-            </div>
-
-        )
-
-    }  
-
 
 
     React.useEffect(()=>{
 
       const getDevicesAsync =async()=>{
             if(caretOpen){
-              const devices =  await getDevices();  
+              const devices = await getDevices();  
               // console.log(devices.videoDevices); 
               setVideoDeviceList(devices.videoDevices);
           }
@@ -41,11 +28,12 @@ const VideoButton = ( { smallFeedlEl } ) => {
         
       getDevicesAsync();
 
-    },[caretOpen])
+    },[caretOpen]);
 
     async function changeVideoDevice(e){
 
         const deviceId = e.target.value;
+        // console.log("sanit for change video",deviceId);
 
         const newConstraints = {
             audio: callStatus.audioDevice ==="default" ? true : {deviceId: {exact:callStatus.audioDevice } } ,
@@ -57,8 +45,10 @@ const VideoButton = ( { smallFeedlEl } ) => {
         dispatch(updateCallStatus('videoDevice',deviceId));
         dispatch(updateCallStatus('video','enabled'));
 
-        smallFeedlEl.current.srcObject = newStream;
+        smallFeedEl.current.srcObject = newStream;
         dispatch(addStream('localStream',newStream));
+
+        setCaretOpen(false);
 
         const tracks = newStream.getVideoTracks();
         // come back to this later because if we modify track that means renegotiation
@@ -81,7 +71,7 @@ const VideoButton = ( { smallFeedlEl } ) => {
           tracks.forEach(trk => trk.enabled = true);
 
         }else if(callStatus.haveMedia){
-          smallFeedlEl.current.srcObject = streams.localStream.stream;
+          smallFeedEl.current.srcObject = streams.localStream.stream;
           StartLocalStream(streams,dispatch);
         }else{
           setPendingUpdate(true);
@@ -93,7 +83,7 @@ const VideoButton = ( { smallFeedlEl } ) => {
           if(pendingUpdate && callStatus.haveMedia){
               // console.log("pending updates success")
               setPendingUpdate(false);
-              smallFeedlEl.current.srcObject = streams.localStream.stream;  
+              smallFeedEl.current.srcObject = streams.localStream.stream;  
               StartLocalStream(streams,dispatch);
           }
 
@@ -109,7 +99,11 @@ const VideoButton = ( { smallFeedlEl } ) => {
                         <div className="btn-text">{callStatus.video === "enabled" ? "Stop" : "Start"} Video</div>
                     </div>
 
-                    { caretOpen && <Dropdown/> }      
+                    { caretOpen && <ActionButtonCaret 
+                                      defaultValue={callStatus.videoDevice} 
+                                      deviceList={videoDeviceList}
+                                      changeHandler={changeVideoDevice}
+                                      type="video" /> }      
 
                 </div>
   )
