@@ -1,15 +1,26 @@
 const { app } = require('./server');
 const jwt = require("jsonwebtoken");
-
 const linkSecret = "adasd##fase$asf5563GDS5%";
+
+const { v4: uuidv4 } = require("uuid");
+
+const professionalAppointments = [];
+
+app.set('professionalAppointments',professionalAppointments);
 
 
 app.get('/user-link',(req,res) => {
 
+    const uuid = uuidv4(); // unique identifier/primary key
+
     const apptData = {
         professionalsFullName: "Akshit Pundir, Doc ",
-        apptDate: Date.now()
+        apptDate: Date.now(),
+        uuid,
+        clientName:"Jim Jones"
     };
+
+    professionalAppointments.push(apptData);
 
     const token = jwt.sign(apptData,linkSecret);
     
@@ -27,6 +38,8 @@ app.post('/validate-link',(req,res) => {
     const decodedData = jwt.verify(token,linkSecret);
 
     res.json(decodedData);
+
+    console.log(professionalAppointments);
 
 });
 
