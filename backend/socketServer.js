@@ -1,5 +1,7 @@
 const { io } = require('./server');
+const jwt = require("jsonwebtoken");
 
+const linkSecret = "adasd##fase$asf5563GDS5%";
 
 const connectedProfessionals = [];
 
@@ -22,12 +24,37 @@ io.on('connection',(socket) => {
 
     console.log(socket.id + "has connected");
     
-    const fullName = socket.handshake.auth.fullname;
+    const token = socket.handshake.auth.jwt ;
     
-    connectedProfessionals.push({
-        socektId:socket.id,
-        fullName:fullName    
-    })
+    let decodedToken;
+    try{
+       decodedToken = jwt.verify(token,linkSecret)
+    }catch(err){
+        console.log(err);
+        socket.disconnect();
+        return;
+    }
+
+    const { fullName, proId } = decodedToken;    
+
+    if(proId){
+        const connectedPro = connectedProfessionals.find( cp => cp.proId === proId);
+
+        if(connectedPro){
+            connectedPro.socektId = socket.id;
+        }else{
+            connectedProfessionals.push({
+                socektId:socket.id,
+                fullName,
+                proId    
+            })
+        }
+    }else{
+        // this is a client
+    }
+
+
+    console.log(connectedProfessionals);
 
     socket.on('newOffer',({offer,apptInfo}) => {
         

@@ -76,6 +76,7 @@ const VideoButton = ( { smallFeedEl } ) => {
         }else{
           setPendingUpdate(true);
         }
+        
     }
 
     React.useEffect(()=>{

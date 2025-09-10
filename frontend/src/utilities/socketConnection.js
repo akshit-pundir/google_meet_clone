@@ -1,9 +1,30 @@
 import { io } from "socket.io-client";
 
-const socket = io.connect('https://localhost:8181');
+let socket;
+const socketConnection = (jwt) => {
+
+    if(socket && socket.connected){
+        return socket;
+
+    }else{
+           socket = io.connect('https://localhost:8181',{
+                auth:{
+                    jwt
+                }
+        });
+    }
+    
+    return socket;
+};
+ 
 
 
-export default socket;
+
+
+
+
+
+export default socketConnection;
 
 
 
