@@ -65,7 +65,7 @@ const MainVideoPage = () => {
              try{
                const pc = streams[s].peerConnection;
                const offer = await pc.createOffer();
-               
+               pc.setLocalDescription(offer);
                const token = searchParams.get('token')
                const socket = socketConnection(token)
                socket.emit('newOffer',{offer,apptInfo});
@@ -88,7 +88,7 @@ const MainVideoPage = () => {
     }
     
 
-  },[callStatus.audio,callStatus.video],callStatus.haveCreatedOffer)  
+  },[callStatus.audio,callStatus.video,callStatus.haveCreatedOffer])  
 
   React.useEffect(()=>{
       const token = searchParams.get('token')

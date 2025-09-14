@@ -42,10 +42,10 @@ io.on('connection',(socket) => {
         const connectedPro = connectedProfessionals.find( cp => cp.proId === proId);
 
         if(connectedPro){
-            connectedPro.socektId = socket.id;
+            connectedPro.socketId = socket.id;
         }else{
             connectedProfessionals.push({
-                socektId:socket.id,
+                socketId:socket.id,
                 fullName,
                 proId    
             })
@@ -58,9 +58,10 @@ io.on('connection',(socket) => {
 
         for(const key in allKnownOffers){
 
-            if(allKnownOffers[key].prfessionalFullName === fullName){
+            if(allKnownOffers[key].professionalsFullName === fullName){
 
                    io.to(socket.id).emit('newOfferWaiting',allKnownOffers[key]); 
+                //    console.log("offer send")
             }
 
         }
@@ -71,7 +72,7 @@ io.on('connection',(socket) => {
     }
 
 
-    console.log(connectedProfessionals);
+    // console.log(connectedProfessionals);
 
     socket.on('newOffer',({offer,apptInfo}) => {
         
@@ -82,7 +83,8 @@ io.on('connection',(socket) => {
           answer:null,
           answerIceCandidates:[]  
        }
-
+       
+    //    console.log("offer came in ")
        
        const professionalAppointments = app.get('professionalAppointments');
        const pa = professionalAppointments.find(pa => pa.uuid === apptInfo.uuid);
@@ -91,12 +93,15 @@ io.on('connection',(socket) => {
             pa.waiting = true;
        }
 
-       const p = connectedProfessionals.find( cp => cp.fullName === apptInfo.prfessionalFullName)
+       const p = connectedProfessionals.find( cp => cp.fullName === apptInfo.professionalsFullName)
        
+    //    console.log("backend connected sockets",connectedProfessionals)
+    //    console.log(" appt info -->",apptInfo.professionalsFullName)
+
        if(p){
-         const socketId = p.socketId;
-         socket.to(socketId).emit('newOfferWaiting',allKnownOffers[apptInfo.uuid]);
-         socket.to(socketId).emit('apptData',professionalAppointments.filter( pa => pa.professionalsFullName === apptInfo.professionalsAppointments ));
+        const socketId = p.socketId;
+        socket.to(socketId).emit('newOfferWaiting',allKnownOffers[apptInfo.uuid]);
+        socket.to(socketId).emit('apptData',professionalAppointments.filter( pa => pa.professionalsFullName === apptInfo.professionalsAppointments ));
 
        }
 

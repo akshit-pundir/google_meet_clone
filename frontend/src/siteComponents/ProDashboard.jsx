@@ -1,8 +1,7 @@
 import React from 'react'
-import { useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import moment from 'moment';
-import  { useDispatch } from 'react-redux'  
+import { useDispatch } from 'react-redux'  
 import socketConnection from '../utilities/socketConnection';
 import proSocketListeners from '../utilities/proSocketListeners';
 import "./proDashboard.css";
@@ -11,6 +10,7 @@ const ProDashboard = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [apptInfo, setApptInfo] = React.useState([]);
+    const navigate = useNavigate();
     const dispatch = useDispatch();
 
       React.useEffect(()=>{
@@ -20,7 +20,15 @@ const ProDashboard = () => {
         
     },[]);
 
+    function joinCall(appointment){
+        
+        const token = searchParams.get('token');
+        navigate(`/join-video-pro?token=${token}&uuid=${appointment.uuid}&client=${appointment.clientName}`)    
+        
 
+    }
+
+    console.log(apptInfo);
 
   return (
      <div className="container">
@@ -64,7 +72,7 @@ const ProDashboard = () => {
                                             <li className="client"> {a.clientName} - {moment(a.apptDate).calendar()}
                                                 {a.waiting ? <> 
                                                 <div className="waiting-text d-inline-block">Waiting</div>
-                                                <button className="btn btn-danger join-btn">Join</button>
+                                                <button className="btn btn-danger join-btn" onClick={() => joinCall(a)} >Join</button>
                                                 </> : <></>}
                                              </li>
                                         
