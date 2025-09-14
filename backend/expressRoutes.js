@@ -4,21 +4,39 @@ const linkSecret = "adasd##fase$asf5563GDS5%";
 
 const { v4: uuidv4 } = require("uuid");
 
-const professionalAppointments = [];
+const professionalAppointments = [{
+    professionalsFullName: "Peter Chan, J.D.",
+    apptDate: Date.now() + 500000,
+    uuid:1,
+    clientName: "Jim Jones",
+},{
+    professionalsFullName: "Peter Chan, J.D.",
+    apptDate: Date.now() - 2000000,
+    uuid:2,// uuid:uuidv4(),
+    clientName: "Akash Patel",
+},{
+    professionalsFullName: "Peter Chan, J.D.",
+    apptDate: Date.now() + 10000000,
+    uuid:3,//uuid:uuidv4(),
+    clientName: "Mike Williams",
+}
+];
 
 app.set('professionalAppointments',professionalAppointments);
 
 
 app.get('/user-link',(req,res) => {
 
-    const uuid = uuidv4(); // unique identifier/primary key
+    // const uuid = uuidv4(); // unique identifier/primary key
 
-    const apptData = {
-        professionalsFullName: "Akshit Pundir, Doc ",
-        apptDate: Date.now(),
-        uuid,
-        clientName:"Jim Jones"
-    };
+    // const apptData = {
+    //     professionalsFullName: "Akshit Pundir, Doc ",
+    //     apptDate: Date.now(),
+    //     uuid,
+    //     clientName:"Jim Jones"
+    // };
+
+    const apptData = professionalAppointments[0];
 
     professionalAppointments.push(apptData);
 
@@ -46,7 +64,7 @@ app.post('/validate-link',(req,res) => {
 app.get('/pro-link',(req,res) => {
 
     const userData = {
-        fullName: "Peter Chan, J.D",
+        fullName: "Peter Chan, J.D.",
         proId: 1234
     };
 

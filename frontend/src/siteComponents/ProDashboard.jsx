@@ -1,27 +1,23 @@
 import React from 'react'
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
+import  { useDispatch } from 'react-redux'  
 import socketConnection from '../utilities/socketConnection';
+import proSocketListeners from '../utilities/proSocketListeners';
 import "./proDashboard.css";
-
 
 const ProDashboard = () => {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [apptInfo, setApptInfo] = React.useState([]);
+    const dispatch = useDispatch();
 
       React.useEffect(()=>{
         const token = searchParams.get('token')
-        socketConnection(token);
-
-        const fetchDecodedToken =async()=>{
-            
-            const { data } = await axios.post(`https://localhost:8181/validate-link`,{token});
-            setApptInfo(data);
-            console.log(data);  
-        }
+        const socket = socketConnection(token);
+        proSocketListeners(socket,setApptInfo,dispatch);   
         
-        fetchDecodedToken();
     },[]);
 
 
@@ -63,9 +59,18 @@ const ProDashboard = () => {
                             <div className="col-6">
                                 <div className="dash-box clients-board blue-bg">
                                     <h4>Coming Appointments</h4>
-                                    <li className="client">Akash Patel - 8-10-23 11am <div className="waiting-text d-inline-block">Waiting</div><button className="btn btn-danger join-btn">Join</button></li>
-                                    <li className="client">Jim Jones - 8-10-23, 2pm</li>
-                                    <li className="client">Mike Williams - 8-10-23 3pm</li>
+                                    {apptInfo?.map( a => <div key={a.uuid}>
+
+                                            <li className="client"> {a.clientName} - {moment(a.apptDate).calendar()}
+                                                {a.waiting ? <> 
+                                                <div className="waiting-text d-inline-block">Waiting</div>
+                                                <button className="btn btn-danger join-btn">Join</button>
+                                                </> : <></>}
+                                             </li>
+                                        
+                                        </div> )}
+                                  
+                        
                                 </div>
                                 
                             </div>
@@ -105,4 +110,4 @@ const ProDashboard = () => {
   )
 }
 
-export default ProDashboard
+export default ProDashboard;
