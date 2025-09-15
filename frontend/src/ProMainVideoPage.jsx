@@ -83,7 +83,16 @@ const ProMainVideoPage = () => {
                 const pc = streams[s].peerConnection;
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                console.log("signaling state",pc.signalingState) 
+                // console.log("signaling state",pc.signalingState) 
+                dispatch(updateCallStatus('haveCreatedAnswer',true));
+                dispatch(updateCallStatus('answer',answer));
+
+                const token = searchParams.get('token');
+                const uuid = searchParams.get('uuid');
+                const socket = socketConnection(token);
+
+                socket.emit('newAnswer',{answer,uuid});
+
             }
         }
 

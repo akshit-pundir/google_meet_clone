@@ -4,6 +4,7 @@ const { app } = require('./server');
 const linkSecret = "adasd##fase$asf5563GDS5%";
 
 const connectedProfessionals = [];
+const connectedClients = [];
 
 
 
@@ -35,6 +36,7 @@ io.on('connection',(socket) => {
             socket.disconnect();
             return;
         }
+        
         
     const { fullName, proId } = decodedToken;    
 
@@ -69,10 +71,45 @@ io.on('connection',(socket) => {
 
     }else{
         // this is a client
+        const { professionalsFullName, uuid, clientName } = decodedToken;   
+        const clientExist = connectedClients.find(c => c.uuid == uuid);
+
+        if(clientExist){
+            clientExist.socketId = socket.id;
+        
+        }else{
+
+            connectedClients.push({
+                clientName,
+                uuid,
+                professionalMeetingWith: professionalsFullName,
+                socketId:socket.id
+            });
+        }
+        const offerForThisClient = allKnownOffers[uuid];
+        if(offerForThisClient){
+            io.to(socket.id).emit('answerToClient',offerForThisClient.answer);
+        }   
+        
+
     }
 
 
-    // console.log(connectedProfessionals);
+    socket.on('newAnswer',({answer,uuid}) => {
+
+        const socketToSendTo = connectedClients.find( c => c.uuid == uuid);
+        if(socketToSendTo){
+            socket.to(socketToSendTo.socketId).emit('answerToClient',answer);
+        }   
+
+        const knownOffer = allKnownOffers[uuid];
+        if(knownOffer){
+            knownOffer.answer = answer;
+        }
+        
+
+
+    });
 
     socket.on('newOffer',({offer,apptInfo}) => {
         

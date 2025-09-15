@@ -10,6 +10,7 @@ import addStream from '../redux-elements/actions/addStream';
 import createPeerConnection from '../utilities/createPeerConnection';
 import socketConnection from '../utilities/socketConnection';
 import updateCallStatus from '../redux-elements/actions/updateCallStatus';
+import clientSocketListners from '../utilities/clientSocketListner';
 
 
 
@@ -66,10 +67,13 @@ const MainVideoPage = () => {
                const pc = streams[s].peerConnection;
                const offer = await pc.createOffer();
                pc.setLocalDescription(offer);
-               const token = searchParams.get('token')
-               const socket = socketConnection(token)
+
+               const token = searchParams.get('token');
+
+               const socket = socketConnection(token);
                socket.emit('newOffer',{offer,apptInfo});
 
+               clientSocketListners(socket,dispatch);
             }catch(err){
               console.log(err.message)
             }
@@ -89,6 +93,37 @@ const MainVideoPage = () => {
     
 
   },[callStatus.audio,callStatus.video,callStatus.haveCreatedOffer])  
+
+
+  React.useEffect(()=>{
+
+    // console.log(callStatus);
+
+    async function addAsyncAnswer(){
+  
+      for(const s in streams){
+
+        if(s !== 'localStream'){
+          const pc = streams[s].peerConnection;
+          await pc.setRemoteDescription(callStatus.answer);
+          console.log(pc.signalingState);
+          console.log("answer added");
+        }
+      
+      }
+      
+    }
+    
+
+    if(callStatus.answer){
+      addAsyncAnswer();
+    }
+
+  },[callStatus.answer])
+
+
+
+
 
   React.useEffect(()=>{
       const token = searchParams.get('token')
