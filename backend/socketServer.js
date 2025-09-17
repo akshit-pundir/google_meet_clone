@@ -144,6 +144,56 @@ io.on('connection',(socket) => {
 
     });
 
+    socket.on('getIce',(uuid,who,ackFunc) => {
+
+        const offer = allKnownOffers[uuid];
+        let iceCandidates = [];
+
+        if(who === "professional"){
+            iceCandidates = offer.offererIceCandidates;
+           
+        }else if(who === "client"){
+            iceCandidates = offer.answerIceCandidates;
+            
+        }
+        // console.log(offer);
+
+        ackFunc(iceCandidates);
+
+    })
+
+
+
+
+    socket.on('iceToServer',({ who, iceCandidates, uuid }) => {
+
+        const offerToUpdate = allKnownOffers[uuid];
+
+        if(offerToUpdate){
+
+           if(who === 'client'){
+              offerToUpdate.offererIceCandidates.push(iceCandidates);
+              const socketToSendTo = connectedProfessionals.find( cp => cp.fullName === decodedToken.professionalsFullName);
+              
+              
+              if(socketToSendTo){
+                  socket.to(socketToSendTo.socketId).emit('iceToClient',iceCandidates);
+                }
+            }else if(who === 'professional'){
+              
+              offerToUpdate.answerIceCandidates.push(iceCandidates);
+              const socketToSendTo = connectedClients.find( cp => cp.uuid == uuid);
+              
+              if(socketToSendTo){
+                socket.to(socketToSendTo.socketId).emit('iceToClient',iceCandidates);
+               }
+            }
+
+        }
+
+    })
+
+
 });
 
 
