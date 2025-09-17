@@ -2,7 +2,7 @@ import peerConfiguration from "./stunServers";
 
 
 
-const createPeerConnection = () => {
+const createPeerConnection = (addIce) => {
 
     return new Promise( async(resolve,reject) => {
 
@@ -15,13 +15,22 @@ const createPeerConnection = () => {
             });
             
             peerConnection.addEventListener('icecandidate',(e) => {
-                  console.log("found ice candidates->>>", e );
+                console.log("found ice candidates->>>", e );
                   
-                  if(e.candidate){
+                if(e.candidate){
+                   addIce(e.candidate); 
+                }
 
-
-                  }
             });
+
+            peerConnection.addEventListener('track',(e) => {
+                console.log("got a track from remote");
+                e.streams[0].getTracks().forEach(track => {
+                    remoteStream.addTrack(track,remoteStream);
+                    console.log("hope it works........")
+                })
+            })
+
 
             resolve({
                 peerConnection,

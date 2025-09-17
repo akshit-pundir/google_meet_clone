@@ -8,18 +8,21 @@ import axios from 'axios';
 import ChatWindow from './videoComponents/ChatWindow';
 import ActionButtons from './videoComponents/ActionButton';
 import updateCallStatus from './redux-elements/actions/updateCallStatus';
+import proSocketListeners from './utilities/proSocketListeners';
 
 const ProMainVideoPage = () => {
   
   const dispatch = useDispatch();
   const [searchParams,setSearchParams] = useSearchParams();
   const [apptInfo,setApptInfo] = React.useState({})
+  const [haveGottenIce,setHaveGottenIce] = React.useState(false)
   const callStatus = useSelector(state => state.callStatus);
   const streams = useSelector(state => state.streams);
 
   const smallFeedEl = useRef(null);
   const largeFeedEl = useRef(null);
-
+  const streamRef = useRef(null);
+    
 
   React.useEffect(()=>{
 
@@ -35,9 +38,10 @@ const ProMainVideoPage = () => {
             dispatch(updateCallStatus('haveMedia',true))
             
             dispatch(addStream('localStream',stream));
-            const { peerConnection ,remoteStream } =  await createPeerConnection();
+            const { peerConnection ,remoteStream } =  await createPeerConnection(addIce);
 
             dispatch(addStream( 'remote1', remoteStream, peerConnection ))
+            largeFeedEl.current.srcObject = remoteStream;
 
         }catch(err){
             console.log(err.message);
@@ -49,6 +53,30 @@ const ProMainVideoPage = () => {
 
   },[]);
 
+
+
+
+  React.useEffect(()=>{
+        const token = searchParams.get('token')
+        const socket = socketConnection(token);
+        proSocketListeners.proVideoSocketListeners(socket,addIceCandidateToPc);   
+        
+    },[]);
+
+
+   function addIceCandidateToPc(iceC){
+    // add ice from the remote,to the pc
+
+    for(const s in streamRef){
+        if(s !== 'localStream'){
+          const pc = streamRef.current[s].peerConnection;
+          pc.addIceCandidate(iceC);
+          console.log("added ice candidates to existing page presernce")
+        }
+
+    }
+
+  }  
 
   React.useEffect(()=>{
         // console.log("inside setasync offer",callStatus)
@@ -105,6 +133,41 @@ const ProMainVideoPage = () => {
   },[callStatus.audio,callStatus.video,callStatus.haveCreatedAnswer])
 
 
+  React.useEffect(()=>{
+
+    async function getIceAsync(){
+        
+       const uuid = searchParams.get('uuid');
+       const socket = socketConnection(searchParams.get('token'));
+       const iceCandidates = await socket.emitWithAck('getIce',uuid,'professional');
+       console.log("ice candi received in proD",iceCandidates);
+       
+       iceCandidates.forEach(iceC => {
+
+          for(const s in streams){
+            if(s !== 'localStream'){
+                const pc = streams[s].peerConnection;
+                pc.addIceCandidate(iceC);
+
+                console.log("ice ********** added!!!!")
+            }
+          }  
+
+       })
+    }
+
+    if(streams.remote1 && !haveGottenIce){
+        setHaveGottenIce(true);
+        getIceAsync();
+        streamRef.current = streams;
+    }
+
+
+  },[streams,haveGottenIce]);
+
+
+
+
 
   React.useEffect(()=>{
       const token = searchParams.get('token')
@@ -115,9 +178,9 @@ const ProMainVideoPage = () => {
         const { data } = await axios.post(`https://localhost:8181/validate-link`,{token});
         
         setApptInfo(data);
-        
         console.log(data);  
-
+        
+        
       }
       
       fetchDecodedToken();
@@ -125,6 +188,24 @@ const ProMainVideoPage = () => {
     },[]);
 
  
+    function addIce(iceCandidates){
+
+      const token = searchParams.get('token')
+      const socket = socketConnection(token);
+      
+      socket.emit('iceToServer',{
+        iceCandidates,
+        who:'professional',
+        uuid: searchParams.get('uuid')
+      });
+
+
+    }  
+
+
+
+
+
   return (
       <div className='main-video-page'>
 

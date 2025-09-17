@@ -1,6 +1,6 @@
 import updateCallStatus from "../redux-elements/actions/updateCallStatus";
 
-const clientSocketListners = (socket,dispatch) => {
+const clientSocketListners = (socket,dispatch,addIceCandidateToPc) => {
 
     socket.on('answerToClient',answer => {
 
@@ -10,7 +10,10 @@ const clientSocketListners = (socket,dispatch) => {
     });
 
 
-
+    socket.on('iceToClient',iceC => {
+        console.log("ice from client ss listnere",iceC);
+        addIceCandidateToPc(iceC)
+    })
 
 
 

@@ -21,10 +21,11 @@ const MainVideoPage = () => {
   const [apptInfo,setApptInfo] = React.useState({})
   const callStatus = useSelector(state => state.callStatus);
   const streams = useSelector(state => state.streams);
-
+  const [showCallInfo,setShowCallInfo] = React.useState(true);
   const smallFeedEl = useRef(null);
   const largeFeedEl = useRef(null);
-
+  const uuidRef = useRef(null);
+  const streamRef = useRef(null);
 
   React.useEffect(()=>{
 
@@ -40,10 +41,11 @@ const MainVideoPage = () => {
             dispatch(updateCallStatus('haveMedia',true))
             
             dispatch(addStream('localStream',stream));
-            const { peerConnection ,remoteStream } =  await createPeerConnection();
+            const { peerConnection ,remoteStream } =  await createPeerConnection(addIce);
 
             dispatch(addStream( 'remote1', remoteStream, peerConnection ))
 
+            largeFeedEl.current.srcObject = remoteStream;
         }catch(err){
             console.log(err.message);
         }
@@ -53,6 +55,18 @@ const MainVideoPage = () => {
     fetchMedia();
 
   },[])
+
+
+  React.useEffect(()=>{
+
+     if(streams.remote1){
+        streamRef.current = streams;
+     } 
+
+
+  },[streams])
+
+
 
   React.useEffect(()=>{
     
@@ -73,7 +87,7 @@ const MainVideoPage = () => {
                const socket = socketConnection(token);
                socket.emit('newOffer',{offer,apptInfo});
 
-               clientSocketListners(socket,dispatch);
+              //  clientSocketListners(socket,dispatch,addIceCandidateToPc);
             }catch(err){
               console.log(err.message)
             }
@@ -129,13 +143,13 @@ const MainVideoPage = () => {
       const token = searchParams.get('token')
       console.log("token came in ",token);
 
-      const fetchDecodedToken =async()=>{
+      const fetchDecodedToken = async() => {
         
         const { data } = await axios.post(`https://localhost:8181/validate-link`,{token});
         
         setApptInfo(data);
-        
         console.log(data);  
+        uuidRef.current = data.uuid;
 
       }
       
@@ -143,7 +157,55 @@ const MainVideoPage = () => {
 
     },[]);
 
- 
+
+
+
+   function addIceCandidateToPc(iceC){
+        // add ice from the remote,to the pc
+
+      for(const s in streamRef.current){
+        
+        if(s !== 'localStream'){
+          
+          const pc = streamRef.current[s].peerConnection;
+          pc.addIceCandidate(iceC);
+          console.log("added ice candidates to existing page presernce");
+          setShowCallInfo(false);
+        }
+          
+      }
+  }  
+                  
+
+
+
+  React.useEffect(()=>{
+        const token = searchParams.get('token')
+        const socket = socketConnection(token);
+        clientSocketListners(socket,dispatch,addIceCandidateToPc);   
+        
+    },[]);
+
+
+
+
+  function addIce(iceCandidates){
+
+      const token = searchParams.get('token')
+      const socket = socketConnection(token);
+      
+      socket.emit('iceToServer',{
+        iceCandidates,
+        who:'client',
+        uuid:uuidRef.current  
+      });
+
+
+    }  
+
+
+
+
   return (
       <div className='main-video-page'>
 
@@ -152,7 +214,7 @@ const MainVideoPage = () => {
               <video id='large-feed' ref={largeFeedEl}  autoPlay playsInline ></video>  
               <video id='own-feed' ref={smallFeedEl}  autoPlay playsInline ></video>  
 
-              {apptInfo.professionalsFullName ? <CallInfo apptInfo={apptInfo}/> : <>User</> }  
+              {showCallInfo ? <CallInfo apptInfo={apptInfo}/> : <>User</> }  
 
               <ChatWindow/>
           </div>

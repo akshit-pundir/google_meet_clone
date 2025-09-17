@@ -1,6 +1,6 @@
 import updateCallStatus from '../redux-elements/actions/updateCallStatus';
 
-const proSocketListeners = (socket, setApptInfo,dispatch) => {
+const proDashboardSocketListeners = (socket, setApptInfo,dispatch) => {
 
     socket.on('apptData', apptData => {
         console.log("appt data from socket",apptData);
@@ -16,7 +16,21 @@ const proSocketListeners = (socket, setApptInfo,dispatch) => {
 
 }
 
-export default proSocketListeners;
+const proVideoSocketListeners = (socket,addIceCandidateToPc) => {
+
+    socket.on('iceToClient', iceC => {
+        addIceCandidateToPc(iceC);
+    })
+
+
+
+
+}
+
+
+
+
+export default { proDashboardSocketListeners, proVideoSocketListeners };
 
 
 
