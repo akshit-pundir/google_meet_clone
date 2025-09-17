@@ -7,7 +7,7 @@ import AudioButton from './audioButton/AudioButton';
 
 
 
-const ActionButtons = ({openCloseChat,smallFeedEl})=>{
+const ActionButtons = ({openCloseChat,smallFeedEl,largeFeedEl})=>{
 
     const callStatus = useSelector(state => state.callStatus);
     // const callStatus = useSelector(state=>state.callStatus);
@@ -74,7 +74,11 @@ const ActionButtons = ({openCloseChat,smallFeedEl})=>{
             </div>  
 
             <div className="center justify-center text-end col-2">
-                <HangupButton/>
+                <HangupButton
+                    smallFeedEl={smallFeedEl}
+                    largeFeedEl={largeFeedEl}
+
+                />
             </div>
         </div> 
     )

@@ -72,8 +72,22 @@ const AudioButton = ({smallFeedEl}) => {
             
             setCaretOpen(false)
 
-            const tracks = newStream.getAudioTracks()
-            
+            const [audioTrack] = newStream.getAudioTracks();
+
+            for(const s in streams){
+            if(s !==  'localStream'){
+              const AllSenders = streams[s].peerConnection.getSenders();
+              const sender = AllSenders.find(s => {
+                if(s.track){
+                  return s.track.kind === audioTrack.kind;
+                }else{
+                  return false;
+                }
+              });
+
+              sender.replaceTrack(audioTrack);
+            }
+        }
         
         }
 

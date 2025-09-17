@@ -50,9 +50,22 @@ const VideoButton = ( { smallFeedEl } ) => {
 
         setCaretOpen(false);
 
-        const tracks = newStream.getVideoTracks();
+        const [videoTrack] = newStream.getVideoTracks();
         // come back to this later because if we modify track that means renegotiation
+        for(const s in streams){
+            if(s !==  'localStream'){
+              const AllSenders = streams[s].peerConnection.getSenders();
+              const sender = AllSenders.find(s => {
+                if(s.track){
+                  return s.track.kind === videoTrack.kind;
+                }else{
+                  return false;
+                }
+              });
 
+              sender.replaceTrack(videoTrack);
+            }
+        }
 
     }
 
