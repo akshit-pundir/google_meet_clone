@@ -7,7 +7,7 @@ const socketConnection = (jwt) => {
         return socket;
 
     }else{
-           socket = io.connect('https://localhost:8181',{
+           socket = io.connect('https://api.hangout.linkpc.net',{
                 auth:{
                     jwt
                 }

@@ -145,7 +145,7 @@ const MainVideoPage = () => {
 
       const fetchDecodedToken = async() => {
         
-        const { data } = await axios.post(`https://localhost:8181/validate-link`,{token});
+        const { data } = await axios.post(`https://api.hangout.linkpc.net/validate-link`,{token});
         
         setApptInfo(data);
         console.log(data);  
