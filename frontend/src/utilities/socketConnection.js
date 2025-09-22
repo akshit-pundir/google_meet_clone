@@ -11,7 +11,7 @@ const socketConnection = (jwt) => {
                 auth:{
                     jwt
                 }
-        });
+        }); 
     }
     
     return socket;
